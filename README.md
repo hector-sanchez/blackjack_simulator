@@ -1,24 +1,12 @@
-# README
+# Blackjack Simulator
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A web-based blackjack game built with Ruby on Rails and PostgreSQL.
 
-Things you may want to cover:
+The application will allow players to play blackjack against a computer-controlled dealer, following standard blackjack rules. It is designed with an extensible architecture to support additional card games in the future.
 
-* Ruby version
+## Tech Stack
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+- Ruby on Rails
+- PostgreSQL
+- Hotwire (Turbo and Stimulus)
+- RSpec
