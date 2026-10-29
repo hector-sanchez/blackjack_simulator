@@ -5,31 +5,58 @@ require 'rails_helper'
 RSpec.describe Games::Blackjack::Deck do
   subject { described_class.new }
 
+  def card(rank, suit: 'hearts')
+    Games::Blackjack::Card.new(suit: suit, rank: rank)
+  end
+
   def draw_all(deck = subject)
     Array.new(deck.remaining) { deck.draw }
   end
 
-  it 'has 52 cards' do
-    expect(subject.remaining).to eq(52)
+  describe '#initialize' do
+    it 'builds a standard 52-card deck by default' do
+      expect(subject.remaining).to eq(52)
+    end
+
+    it 'uses the provided cards' do
+      ace = card('A')
+      ten = card(10)
+      deck = described_class.new(cards: [ ace, ten ])
+
+      expect(deck.cards).to eq([ ace, ten ])
+      expect(deck.draw).to eq(ace)
+      expect(deck.draw).to eq(ten)
+      expect(deck).to be_empty
+    end
   end
 
-  it 'has 4 suits' do
-    expect(draw_all.map(&:suit).uniq.count).to eq(4)
-  end
+  describe '#cards' do
+    it 'has 52 cards' do
+      expect(subject.cards.count).to eq(52)
+    end
 
-  it 'has 13 ranks' do
-    expect(draw_all.map(&:rank).uniq.count).to eq(13)
+    it 'has 4 suits' do
+      expect(subject.cards.map(&:suit).uniq.count).to eq(4)
+    end
+
+    it 'has 13 ranks' do
+      expect(subject.cards.map(&:rank).uniq.count).to eq(13)
+    end
+
+    it 'does not let callers mutate the deck through the reader' do
+      subject.cards.clear
+
+      expect(subject.remaining).to eq(52)
+    end
   end
 
   describe '#shuffle!' do
     it 'shuffles the cards' do
-      unshuffled = described_class.new
+      original_order = subject.cards.map { |c| [ c.suit, c.rank ] }
 
       subject.shuffle!
 
-      shuffled_order = draw_all.map { |card| [ card.suit, card.rank ] }
-      original_order = draw_all(unshuffled).map { |card| [ card.suit, card.rank ] }
-
+      shuffled_order = subject.cards.map { |c| [ c.suit, c.rank ] }
       expect(shuffled_order).not_to eq(original_order)
     end
   end

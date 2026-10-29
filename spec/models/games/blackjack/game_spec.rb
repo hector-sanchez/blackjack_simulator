@@ -8,21 +8,15 @@ RSpec.describe Games::Blackjack::Game do
   end
 
   def deck_drawing(*cards)
-    deck = instance_double(Games::Blackjack::Deck)
-    allow(deck).to receive(:draw).and_return(*cards)
-    deck
+    Games::Blackjack::Deck.new(cards: cards)
   end
 
-  def unused_deck
-    instance_double(Games::Blackjack::Deck)
+  def pending_game
+    described_class.new(deck: Games::Blackjack::Deck.new(cards: []))
   end
 
   def game_with(*cards)
     described_class.new(deck: deck_drawing(*cards))
-  end
-
-  def pending_game
-    described_class.new(deck: unused_deck)
   end
 
   describe '#initialize' do

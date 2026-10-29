@@ -5,11 +5,15 @@ module Games
     class Deck
       class EmptyError < StandardError; end
 
-      def initialize
+      def initialize(cards: nil)
         @cards =
-          Games::Blackjack::Card::SUITS.product(Games::Blackjack::Card::RANKS).map do |suit, rank|
+          cards || Games::Blackjack::Card::SUITS.product(Games::Blackjack::Card::RANKS).map do |suit, rank|
             Games::Blackjack::Card.new(suit: suit, rank: rank)
           end
+      end
+
+      def cards
+        @cards.dup
       end
 
       def shuffle!
