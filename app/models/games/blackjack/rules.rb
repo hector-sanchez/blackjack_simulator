@@ -16,18 +16,20 @@ module Games
         end
 
         def outcome(player_hand, dealer_hand)
-          return :dealer_win if player_hand.busted?
-          return :player_win if dealer_hand.busted?
+          return :dealer_win if player_hand.busted? || winning_hand?(dealer_hand, player_hand)
+          return :player_win if winning_hand?(player_hand, dealer_hand)
 
-          if player_hand.blackjack? != dealer_hand.blackjack?
-            return player_hand.blackjack? ? :player_win : :dealer_win
-          end
+          :push
+        end
 
-          case player_hand.total <=> dealer_hand.total
-          when 1 then :player_win
-          when -1 then :dealer_win
-          else :push
-          end
+        private
+
+        def winning_hand?(hand, other)
+          return false if hand.busted?
+          return true if other.busted?
+          return hand.blackjack? if hand.blackjack? != other.blackjack?
+
+          hand.total > other.total
         end
       end
     end
