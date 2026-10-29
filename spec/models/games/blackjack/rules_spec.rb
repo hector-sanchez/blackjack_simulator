@@ -12,80 +12,50 @@ RSpec.describe Games::Blackjack::Rules do
   end
 
   describe '.legal_actions' do
-    it 'allows hit and stand below 21' do
-      expect(described_class.legal_actions(hand(10, 7))).to eq([ :hit, :stand ])
-    end
-
-    it 'prevents hit at 21' do
-      expect(described_class.legal_actions(hand(7, 9, 5))).to eq([ :stand ])
-    end
-
-    it 'prevents actions after bust' do
-      expect(described_class.legal_actions(hand('K', 'Q', 5))).to eq([])
-    end
-
-    it 'prevents actions after natural blackjack' do
-      expect(described_class.legal_actions(hand('A', 'K'))).to eq([])
+    [
+      { ranks: [ 10, 7 ], result: [ :hit, :stand ], case: 'allows hit and stand below 21' },
+      { ranks: [ 7, 9, 5 ], result: [ :stand ], case: 'prevents hit at 21' },
+      { ranks: [ 'K', 'Q', 5 ], result: [], case: 'prevents actions after bust' },
+      { ranks: [ 'A', 'K' ], result: [], case: 'prevents actions after natural blackjack' }
+    ].each do |scenario|
+      it scenario[:case] do
+        expect(described_class.legal_actions(hand(*scenario[:ranks]))).to eq(scenario[:result])
+      end
     end
   end
 
   describe '.dealer_hits?' do
-    it 'hits below 17' do
-      expect(described_class.dealer_hits?(hand(10, 6))).to eq(true)
-    end
-
-    it 'hits on soft 16' do
-      expect(described_class.dealer_hits?(hand('A', 5))).to eq(true)
-    end
-
-    it 'stands on hard 17' do
-      expect(described_class.dealer_hits?(hand(10, 7))).to eq(false)
-    end
-
-    it 'stands on soft 17' do
-      expect(described_class.dealer_hits?(hand('A', 6))).to eq(false)
-    end
-
-    it 'stands above 17' do
-      expect(described_class.dealer_hits?(hand(10, 8))).to eq(false)
+    [
+      { ranks: [ 10, 6 ], result: true, case: 'hits below 17' },
+      { ranks: [ 'A', 5 ], result: true, case: 'hits on soft 16' },
+      { ranks: [ 10, 7 ], result: false, case: 'stands on hard 17' },
+      { ranks: [ 'A', 6 ], result: false, case: 'stands on soft 17' },
+      { ranks: [ 10, 8 ], result: false, case: 'stands above 17' }
+    ].each do |scenario|
+      it scenario[:case] do
+        expect(described_class.dealer_hits?(hand(*scenario[:ranks]))).to eq(scenario[:result])
+      end
     end
   end
 
   describe '.outcome' do
-    it 'resolves player bust' do
-      expect(described_class.outcome(hand('K', 'Q', 2), hand(10, 8))).to eq(:dealer_win)
-    end
+    [
+      { player: [ 'K', 'Q', 2 ], dealer: [ 10, 8 ], result: :dealer_win, case: 'player bust' },
+      { player: [ 'K', 'Q', 2 ], dealer: [ 'K', 'Q', 4 ], result: :dealer_win, case: 'player bust even when the dealer also busts' },
+      { player: [ 10, 10 ], dealer: [ 'K', 'Q', 3 ], result: :player_win, case: 'dealer bust' },
+      { player: [ 10, 10 ], dealer: [ 10, 8 ], result: :player_win, case: 'higher player total' },
+      { player: [ 10, 8 ], dealer: [ 10, 10 ], result: :dealer_win, case: 'higher dealer total' },
+      { player: [ 10, 9 ], dealer: [ 10, 9 ], result: :push, case: 'equal totals' },
+      { player: [ 'A', 'K' ], dealer: [ 7, 9, 5 ], result: :player_win, case: 'player natural blackjack over ordinary 21' },
+      { player: [ 7, 9, 5 ], dealer: [ 'A', 'K' ], result: :dealer_win, case: 'dealer natural blackjack over ordinary 21' },
+      { player: [ 'A', 'K' ], dealer: [ 'A', 10 ], result: :push, case: 'simultaneous naturals' }
+    ].each do |scenario|
+      it "resolves #{scenario[:case]}" do
+        player_hand = hand(*scenario[:player])
+        dealer_hand = hand(*scenario[:dealer])
 
-    it 'resolves player bust even when the dealer also busts' do
-      expect(described_class.outcome(hand('K', 'Q', 2), hand('K', 'Q', 4))).to eq(:dealer_win)
-    end
-
-    it 'resolves dealer bust' do
-      expect(described_class.outcome(hand(10, 10), hand('K', 'Q', 3))).to eq(:player_win)
-    end
-
-    it 'resolves higher player total' do
-      expect(described_class.outcome(hand(10, 10), hand(10, 8))).to eq(:player_win)
-    end
-
-    it 'resolves higher dealer total' do
-      expect(described_class.outcome(hand(10, 8), hand(10, 10))).to eq(:dealer_win)
-    end
-
-    it 'resolves equal totals' do
-      expect(described_class.outcome(hand(10, 9), hand(10, 9))).to eq(:push)
-    end
-
-    it 'resolves player natural blackjack over ordinary 21' do
-      expect(described_class.outcome(hand('A', 'K'), hand(7, 9, 5))).to eq(:player_win)
-    end
-
-    it 'resolves dealer natural blackjack over ordinary 21' do
-      expect(described_class.outcome(hand(7, 9, 5), hand('A', 'K'))).to eq(:dealer_win)
-    end
-
-    it 'resolves simultaneous naturals' do
-      expect(described_class.outcome(hand('A', 'K'), hand('A', 10))).to eq(:push)
+        expect(described_class.outcome(player_hand, dealer_hand)).to eq(scenario[:result])
+      end
     end
   end
 end
