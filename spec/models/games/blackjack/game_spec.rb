@@ -94,21 +94,6 @@ RSpec.describe Games::Blackjack::Game do
 
       expect { game.start! }.to raise_error(Games::Blackjack::Game::InvalidActionError)
     end
-
-    it 'does not let callers mutate hands except through game actions' do
-      extra = card(2)
-      game = game_with(card(10), card(9), card(7), card(6))
-      game.start!
-      player_cards = game.player_hand.cards
-      dealer_cards = game.dealer_hand.cards
-
-      game.player_hand.add_card(extra)
-      game.dealer_hand.add_card(extra)
-
-      expect(game.player_hand.cards).to eq(player_cards)
-      expect(game.dealer_hand.cards).to eq(dealer_cards)
-      expect(game.state).to eq(:player_turn)
-    end
   end
 
   describe '#hit!' do

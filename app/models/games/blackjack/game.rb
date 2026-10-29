@@ -7,7 +7,7 @@ module Games
     class Game
       class InvalidActionError < StandardError; end
 
-      attr_reader :state, :outcome
+      attr_reader :player_hand, :dealer_hand, :state, :outcome
 
       def initialize(deck: nil)
         @deck = deck || Deck.new.tap(&:shuffle!)
@@ -15,14 +15,6 @@ module Games
         @dealer_hand = Hand.new
         @state = :pending
         @outcome = nil
-      end
-
-      def player_hand
-        Hand.new(@player_hand.cards)
-      end
-
-      def dealer_hand
-        Hand.new(@dealer_hand.cards)
       end
 
       def start!
