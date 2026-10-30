@@ -63,6 +63,10 @@ module Games
         [ @dealer_hand.cards.first ]
       end
 
+      def remaining_cards
+        @deck.cards
+      end
+
       private
 
       def require_player_action!(action)

@@ -185,6 +185,33 @@ RSpec.describe Games::Blackjack::Game do
     end
   end
 
+  describe '#remaining_cards' do
+    it 'returns the undealt cards' do
+      player_first = card(10)
+      dealer_upcard = card(9)
+      player_second = card(7)
+      dealer_hole = card(6)
+      leftover = card(2)
+      game = game_with(player_first, dealer_upcard, player_second, dealer_hole, leftover)
+
+      expect(game.remaining_cards).to eq([ player_first, dealer_upcard, player_second, dealer_hole, leftover ])
+
+      game.start!
+
+      expect(game.remaining_cards).to eq([ leftover ])
+    end
+
+    it 'does not let callers mutate the remaining deck through the reader' do
+      leftover = card(2)
+      game = game_with(card(10), card(9), card(7), card(6), leftover)
+      game.start!
+
+      game.remaining_cards.clear
+
+      expect(game.remaining_cards).to eq([ leftover ])
+    end
+  end
+
   describe '#visible_dealer_cards' do
     it 'hides the hole card until the round finishes' do
       upcard = card(10)
