@@ -15,6 +15,15 @@ module Games
         @suit = suit.dup.freeze
         @rank = rank.is_a?(String) ? rank.dup.freeze : rank
       end
+
+      def ==(other)
+        other.is_a?(Card) && suit == other.suit && rank == other.rank
+      end
+      alias eql? ==
+
+      def hash
+        [ self.class, suit, rank ].hash
+      end
     end
   end
 end

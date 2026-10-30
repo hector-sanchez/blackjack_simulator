@@ -32,4 +32,10 @@ RSpec.describe Games::Blackjack::Card do
   it "has a valid rank" do
     expect(Games::Blackjack::Card::RANKS).to eq((2..10).to_a + %w[J Q K A])
   end
+
+  it "is equal to another card with the same suit and rank" do
+    expect(Games::Blackjack::Card.new(suit: "hearts", rank: 10)).to eq(
+      Games::Blackjack::Card.new(suit: "hearts", rank: 10)
+    )
+  end
 end
