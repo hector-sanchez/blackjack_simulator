@@ -31,6 +31,60 @@ RSpec.describe Games::Blackjack::Game do
     end
   end
 
+  describe '.restore' do
+    it 'rebuilds a mid-turn game without dealing' do
+      leftover = card(3)
+      player_ten = card(10)
+      player_seven = card(7)
+      dealer_nine = card(9)
+      dealer_six = card(6)
+      game = described_class.restore(
+        deck: deck_drawing(leftover),
+        player_hand: Games::Blackjack::Hand.new([ player_ten, player_seven ]),
+        dealer_hand: Games::Blackjack::Hand.new([ dealer_nine, dealer_six ]),
+        state: :player_turn,
+        outcome: nil
+      )
+
+      expect(game.state).to eq(:player_turn)
+      expect(game.player_hand.cards).to eq([ player_ten, player_seven ])
+      expect(game.dealer_hand.cards).to eq([ dealer_nine, dealer_six ])
+      expect(game.remaining_cards).to eq([ leftover ])
+      expect(game.outcome).to eq(nil)
+    end
+
+    it 'draws the next remaining card on hit' do
+      extra = card(3)
+      game = described_class.restore(
+        deck: deck_drawing(extra),
+        player_hand: Games::Blackjack::Hand.new([ card(10), card(2) ]),
+        dealer_hand: Games::Blackjack::Hand.new([ card(9), card(8) ]),
+        state: :player_turn,
+        outcome: nil
+      )
+
+      game.hit!
+
+      expect(game.player_hand.cards.last).to eq(extra)
+      expect(game.state).to eq(:player_turn)
+    end
+
+    it 'keeps a finished round finished' do
+      game = described_class.restore(
+        deck: deck_drawing,
+        player_hand: Games::Blackjack::Hand.new([ card('A'), card('K') ]),
+        dealer_hand: Games::Blackjack::Hand.new([ card(9), card(7) ]),
+        state: :finished,
+        outcome: :player_win
+      )
+
+      expect(game.finished?).to eq(true)
+      expect(game.outcome).to eq(:player_win)
+      expect { game.start! }.to raise_error(Games::Blackjack::Game::InvalidActionError)
+      expect { game.hit! }.to raise_error(Games::Blackjack::Game::InvalidActionError)
+    end
+  end
+
   describe '#start!' do
     it 'deals two cards to each participant in alternating order' do
       player_first = card(10)

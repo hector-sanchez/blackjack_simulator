@@ -9,12 +9,22 @@ module Games
 
       attr_reader :player_hand, :dealer_hand, :state, :outcome
 
-      def initialize(deck: nil)
+      def initialize(deck: nil, player_hand: nil, dealer_hand: nil, state: :pending, outcome: nil)
         @deck = deck || Deck.new.tap(&:shuffle!)
-        @player_hand = Hand.new
-        @dealer_hand = Hand.new
-        @state = :pending
-        @outcome = nil
+        @player_hand = player_hand || Hand.new
+        @dealer_hand = dealer_hand || Hand.new
+        @state = state
+        @outcome = outcome
+      end
+
+      def self.restore(deck:, player_hand:, dealer_hand:, state:, outcome:)
+        new(
+          deck: deck,
+          player_hand: player_hand,
+          dealer_hand: dealer_hand,
+          state: state,
+          outcome: outcome
+        )
       end
 
       def start!
