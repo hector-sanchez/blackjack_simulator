@@ -35,4 +35,47 @@ RSpec.describe Games::Blackjack::SessionManager do
       expect(game.state.to_s).to eq(session.state["state"])
     end
   end
+
+  describe ".hit!" do
+    it "executes a hit and persists the updated game" do
+      session = described_class.start!
+      game = described_class.load(session)
+
+      # A natural blackjack can finish immediately.
+      # This example requires a session in player_turn.
+      skip "Initial game finished" if game.finished?
+
+      initial_count = game.player_hand.cards.size
+
+      described_class.hit!(session)
+
+      restored = described_class.load(session.reload)
+
+      expect(restored.player_hand.cards.size).to eq(initial_count + 1)
+      expect(restored.remaining_cards.size).to eq(47)
+    end
+  end
+
+  describe ".stand!" do
+    it "executes a stand and persists the updated game" do
+      session = described_class.start!
+      game = described_class.load(session)
+
+      # A natural blackjack can finish immediately.
+      # This example requires a session in player_turn.
+      skip "Initial game finished" if game.finished?
+
+      initial_count = game.player_hand.cards.size
+
+      described_class.stand!(session)
+
+      restored = described_class.load(session.reload)
+
+      expect(restored.player_hand.cards.size).to eq(initial_count)
+      expect(restored.dealer_hand.cards.size).to be >= 2
+      expect(restored).to be_finished
+      expect(restored.outcome).to be_present
+      expect(session.status).to eq("completed")
+    end
+  end
 end
