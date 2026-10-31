@@ -28,6 +28,8 @@ module Games
 
       def self.perform_action!(session, action)
         session.with_lock do
+          raise ArgumentError, "Not a Blackjack session" unless session.game_type == "blackjack"
+
           game = load(session)
 
           case action

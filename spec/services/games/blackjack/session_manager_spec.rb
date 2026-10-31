@@ -3,6 +3,25 @@
 require "rails_helper"
 
 RSpec.describe Games::Blackjack::SessionManager do
+  def card(rank, suit: "spades")
+    Games::Blackjack::Card.new(rank: rank, suit: suit)
+  end
+
+  def deck_with(*cards)
+    Games::Blackjack::Deck.new(cards: cards)
+  end
+
+  def create_session(deck:)
+    game = Games::Blackjack::Game.new(deck: deck)
+    game.start!
+
+    GameSession.create!(
+      game_type: "blackjack",
+      state: Games::Blackjack::GameSerializer.new(game).to_h,
+      status: game.finished? ? "completed" : "active"
+    )
+  end
+
   describe ".start!" do
     it "creates and persists a Blackjack game session" do
       expect {
@@ -38,43 +57,44 @@ RSpec.describe Games::Blackjack::SessionManager do
 
   describe ".hit!" do
     it "executes a hit and persists the updated game" do
-      session = described_class.start!
-      game = described_class.load(session)
-
-      # A natural blackjack can finish immediately.
-      # This example requires a session in player_turn.
-      skip "Initial game finished" if game.finished?
-
-      initial_count = game.player_hand.cards.size
+      # Deal: player 10, dealer 9, player 7, dealer 6. Hit: 4.
+      session = create_session(deck: deck_with(card(10), card(9), card(7), card(6), card(4)))
 
       described_class.hit!(session)
 
       restored = described_class.load(session.reload)
 
-      expect(restored.player_hand.cards.size).to eq(initial_count + 1)
-      expect(restored.remaining_cards.size).to eq(47)
+      expect(restored.player_hand.cards).to eq([ card(10), card(7), card(4) ])
+      expect(restored.remaining_cards).to eq([])
+      expect(session.status).to eq("active")
+    end
+
+    it "rejects a session that is not blackjack" do
+      session = GameSession.create!(
+        game_type: "poker",
+        state: { "any" => "payload" },
+        status: "active"
+      )
+
+      expect {
+        described_class.hit!(session)
+      }.to raise_error(ArgumentError, "Not a Blackjack session")
     end
   end
 
   describe ".stand!" do
     it "executes a stand and persists the updated game" do
-      session = described_class.start!
-      game = described_class.load(session)
-
-      # A natural blackjack can finish immediately.
-      # This example requires a session in player_turn.
-      skip "Initial game finished" if game.finished?
-
-      initial_count = game.player_hand.cards.size
+      # Deal: player 10, dealer 9, player 9, dealer 6. Dealer hit: K (bust).
+      session = create_session(deck: deck_with(card(10), card(9), card(9), card(6), card("K")))
 
       described_class.stand!(session)
 
       restored = described_class.load(session.reload)
 
-      expect(restored.player_hand.cards.size).to eq(initial_count)
-      expect(restored.dealer_hand.cards.size).to be >= 2
+      expect(restored.player_hand.cards).to eq([ card(10), card(9) ])
+      expect(restored.dealer_hand.cards).to eq([ card(9), card(6), card("K") ])
       expect(restored).to be_finished
-      expect(restored.outcome).to be_present
+      expect(restored.outcome).to eq(:player_win)
       expect(session.status).to eq("completed")
     end
   end
