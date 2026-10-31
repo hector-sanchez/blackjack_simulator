@@ -63,6 +63,23 @@ RSpec.describe Games::Blackjack::GameSerializer do
   end
 
   describe '.load' do
+    it 'restores a game from the raw to_h snapshot' do
+      leftover = card(2)
+      game = Games::Blackjack::Game.new(
+        deck: Games::Blackjack::Deck.new(
+          cards: [ card(10), card(9), card(7), card(6), leftover ]
+        )
+      )
+      game.start!
+
+      restored = described_class.load(described_class.new(game).to_h)
+
+      expect(restored.state).to eq(game.state)
+      expect(restored.player_hand.cards).to eq(game.player_hand.cards)
+      expect(restored.dealer_hand.cards).to eq(game.dealer_hand.cards)
+      expect(restored.remaining_cards).to eq(game.remaining_cards)
+    end
+
     it 'restores a serialized game without losing state' do
       leftover = card(2)
       game = Games::Blackjack::Game.new(

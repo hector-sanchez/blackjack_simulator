@@ -18,6 +18,8 @@ module Games
       end
 
       def self.load(data)
+        data = data.deep_stringify_keys
+
         build_cards = lambda do |cards|
           cards.map do |card|
             Card.new(
