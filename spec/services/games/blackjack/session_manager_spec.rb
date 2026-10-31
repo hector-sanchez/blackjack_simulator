@@ -16,7 +16,7 @@ RSpec.describe Games::Blackjack::SessionManager do
     game.start!
 
     GameSession.create!(
-      state: Games::Blackjack::GameSerializer.new(game).to_h,
+      state: Games::Blackjack::GameSerializer.new(game).to_snapshot_h,
       status: game.finished? ? "completed" : "active"
     )
   end

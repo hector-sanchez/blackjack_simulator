@@ -8,7 +8,7 @@ module Games
         game.start!
 
         GameSession.create!(
-          state: GameSerializer.new(game).to_h,
+          state: GameSerializer.new(game).to_snapshot_h,
           status: game.finished? ? "completed" : "active"
         )
       end
@@ -37,7 +37,7 @@ module Games
           end
 
           session.update!(
-            state: GameSerializer.new(game).to_h,
+            state: GameSerializer.new(game).to_snapshot_h,
             status: game.finished? ? "completed" : "active"
           )
 

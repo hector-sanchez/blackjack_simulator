@@ -15,7 +15,7 @@ RSpec.describe Games::Blackjack::GameSerializer do
     remaining = card(2)
     game = Games::Blackjack::Game.new(deck: Games::Blackjack::Deck.new(cards: [ remaining ]))
 
-    expect(described_class.new(game).to_h).to eq(
+    expect(described_class.new(game).to_snapshot_h).to eq(
       state: 'pending',
       outcome: nil,
       player_cards: [],
@@ -38,7 +38,7 @@ RSpec.describe Games::Blackjack::GameSerializer do
     serializer = described_class.new(game)
     game.start!
 
-    expect(serializer.to_h).to eq(
+    expect(serializer.to_snapshot_h).to eq(
       state: 'player_turn',
       outcome: nil,
       player_cards: [ card_hash(player_first), card_hash(player_second) ],
@@ -56,14 +56,59 @@ RSpec.describe Games::Blackjack::GameSerializer do
     serializer = described_class.new(game)
     game.start!
 
-    expect(serializer.to_h).to include(
+    expect(serializer.to_snapshot_h).to include(
       state: 'finished',
       outcome: 'player_win'
     )
   end
 
+  describe '#to_public_h' do
+    it 'hides the hole card and remaining shoe during the player turn' do
+      player_first = card(10)
+      dealer_upcard = card(9)
+      player_second = card(7)
+      dealer_hole = card(6)
+      leftover = card(2)
+      game = Games::Blackjack::Game.new(
+        deck: Games::Blackjack::Deck.new(
+          cards: [ player_first, dealer_upcard, player_second, dealer_hole, leftover ]
+        )
+      )
+      game.start!
+
+      expect(described_class.new(game).to_public_h).to eq(
+        state: 'player_turn',
+        outcome: nil,
+        player_cards: [ card_hash(player_first), card_hash(player_second) ],
+        dealer_cards: [ card_hash(dealer_upcard) ],
+        legal_actions: [ 'hit', 'stand' ]
+      )
+    end
+
+    it 'reveals the dealer hand when the round is finished' do
+      ace = card('A')
+      nine = card(9)
+      king = card('K')
+      seven = card(7)
+      game = Games::Blackjack::Game.new(
+        deck: Games::Blackjack::Deck.new(
+          cards: [ ace, nine, king, seven ]
+        )
+      )
+      game.start!
+
+      expect(described_class.new(game).to_public_h).to eq(
+        state: 'finished',
+        outcome: 'player_win',
+        player_cards: [ card_hash(ace), card_hash(king) ],
+        dealer_cards: [ card_hash(nine), card_hash(seven) ],
+        legal_actions: []
+      )
+    end
+  end
+
   describe '.load' do
-    it 'restores a game from the raw to_h snapshot' do
+    it 'restores a game from the raw snapshot hash' do
       leftover = card(2)
       game = Games::Blackjack::Game.new(
         deck: Games::Blackjack::Deck.new(
@@ -72,7 +117,7 @@ RSpec.describe Games::Blackjack::GameSerializer do
       )
       game.start!
 
-      restored = described_class.load(described_class.new(game).to_h)
+      restored = described_class.load(described_class.new(game).to_snapshot_h)
 
       expect(restored.state).to eq(game.state)
       expect(restored.player_hand.cards).to eq(game.player_hand.cards)
@@ -89,7 +134,7 @@ RSpec.describe Games::Blackjack::GameSerializer do
       )
       game.start!
 
-      snapshot = described_class.new(game).to_h.deep_stringify_keys
+      snapshot = described_class.new(game).to_snapshot_h.deep_stringify_keys
       restored = described_class.load(snapshot)
 
       expect(restored.state).to eq(game.state)
@@ -106,7 +151,7 @@ RSpec.describe Games::Blackjack::GameSerializer do
         )
       )
       game.start!
-      restored = described_class.load(described_class.new(game).to_h.deep_stringify_keys)
+      restored = described_class.load(described_class.new(game).to_snapshot_h.deep_stringify_keys)
 
       restored.hit!
 
@@ -121,7 +166,7 @@ RSpec.describe Games::Blackjack::GameSerializer do
         )
       )
       game.start!
-      restored = described_class.load(described_class.new(game).to_h.deep_stringify_keys)
+      restored = described_class.load(described_class.new(game).to_snapshot_h.deep_stringify_keys)
 
       expect(restored.finished?).to eq(true)
       expect(restored.outcome).to eq(:player_win)

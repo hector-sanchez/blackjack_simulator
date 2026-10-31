@@ -7,13 +7,23 @@ module Games
         @game = game
       end
 
-      def to_h
+      def to_snapshot_h
         {
           state: @game.state.to_s,
           outcome: @game.outcome&.to_s,
-          player_cards: @game.player_hand.cards.map { |card| { suit: card.suit, rank: card.rank } },
-          dealer_cards: @game.dealer_hand.cards.map { |card| { suit: card.suit, rank: card.rank } },
-          remaining_cards: @game.remaining_cards.map { |card| { suit: card.suit, rank: card.rank } }
+          player_cards: card_hashes(@game.player_hand.cards),
+          dealer_cards: card_hashes(@game.dealer_hand.cards),
+          remaining_cards: card_hashes(@game.remaining_cards)
+        }
+      end
+
+      def to_public_h
+        {
+          state: @game.state.to_s,
+          outcome: @game.outcome&.to_s,
+          player_cards: card_hashes(@game.player_hand.cards),
+          dealer_cards: card_hashes(@game.visible_dealer_cards),
+          legal_actions: @game.legal_actions.map(&:to_s)
         }
       end
 
@@ -36,6 +46,12 @@ module Games
           state: data.fetch("state").to_sym,
           outcome: data["outcome"]&.to_sym
         )
+      end
+
+      private
+
+      def card_hashes(cards)
+        cards.map { |card| { suit: card.suit, rank: card.rank } }
       end
     end
   end
