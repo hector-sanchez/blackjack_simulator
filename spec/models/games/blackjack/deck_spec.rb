@@ -28,6 +28,15 @@ RSpec.describe Games::Blackjack::Deck do
       expect(deck.draw).to eq(ten)
       expect(deck).to be_empty
     end
+
+    it 'does not let callers mutate the deck through the initializer array' do
+      cards = [ card('A'), card(10) ]
+      deck = described_class.new(cards: cards)
+
+      cards.clear
+
+      expect(deck.remaining).to eq(2)
+    end
   end
 
   describe '#cards' do

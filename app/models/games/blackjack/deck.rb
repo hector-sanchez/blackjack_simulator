@@ -7,8 +7,12 @@ module Games
 
       def initialize(cards: nil)
         @cards =
-          cards || Games::Blackjack::Card::SUITS.product(Games::Blackjack::Card::RANKS).map do |suit, rank|
-            Games::Blackjack::Card.new(suit: suit, rank: rank)
+          if cards
+            cards.dup
+          else
+            Games::Blackjack::Card::SUITS.product(Games::Blackjack::Card::RANKS).map do |suit, rank|
+              Games::Blackjack::Card.new(suit: suit, rank: rank)
+            end
           end
       end
 
