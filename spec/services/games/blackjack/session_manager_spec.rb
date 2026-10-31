@@ -22,6 +22,26 @@ RSpec.describe Games::Blackjack::SessionManager do
     )
   end
 
+  describe "invalid actions" do
+    it "does not modify a completed session" do
+      session = create_session(
+        deck: deck_with(
+          card("A"), card(9),
+          card("K"), card(7)
+        )
+      )
+
+      original_state = session.state.deep_dup
+
+      expect {
+        described_class.hit!(session)
+      }.to raise_error(Games::Blackjack::Game::InvalidActionError)
+
+      expect(session.reload.state).to eq(original_state)
+      expect(session).to be_completed
+    end
+  end
+
   describe ".start!" do
     it "creates and persists a Blackjack game session" do
       expect {
