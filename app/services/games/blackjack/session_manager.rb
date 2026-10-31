@@ -8,7 +8,6 @@ module Games
         game.start!
 
         GameSession.create!(
-          game_type: "blackjack",
           state: GameSerializer.new(game).to_h,
           status: game.finished? ? "completed" : "active"
         )
@@ -28,8 +27,6 @@ module Games
 
       def self.perform_action!(session, action)
         session.with_lock do
-          raise ArgumentError, "Not a Blackjack session" unless session.game_type == "blackjack"
-
           game = load(session)
 
           case action

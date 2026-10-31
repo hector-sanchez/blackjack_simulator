@@ -10,12 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_190520) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_185200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "game_sessions", force: :cascade do |t|
-    t.string "game_type", null: false
     t.jsonb "state", default: {}, null: false
     t.string "status", default: "active", null: false
     t.datetime "created_at", null: false

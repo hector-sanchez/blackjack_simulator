@@ -6,7 +6,6 @@ class GameSession < ApplicationRecord
     completed: "completed"
   }
 
-  validates :game_type, presence: true
   validates :state, presence: true
   validates :status, presence: true
 end

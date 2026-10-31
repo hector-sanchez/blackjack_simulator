@@ -5,21 +5,13 @@ require "rails_helper"
 RSpec.describe GameSession, type: :model do
   def valid_attributes
     {
-      game_type: "blackjack",
       state: { "any" => "payload" },
       status: "active"
     }
   end
 
-  it "is valid with a game type, nonempty state hash, and status" do
+  it "is valid with a nonempty state hash and status" do
     expect(described_class.new(valid_attributes)).to be_valid
-  end
-
-  it "requires a game type" do
-    session = described_class.new(valid_attributes.merge(game_type: nil))
-
-    expect(session).not_to be_valid
-    expect(session.errors[:game_type]).to be_present
   end
 
   it "requires a state" do

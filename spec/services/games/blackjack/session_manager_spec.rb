@@ -16,7 +16,6 @@ RSpec.describe Games::Blackjack::SessionManager do
     game.start!
 
     GameSession.create!(
-      game_type: "blackjack",
       state: Games::Blackjack::GameSerializer.new(game).to_h,
       status: game.finished? ? "completed" : "active"
     )
@@ -50,7 +49,6 @@ RSpec.describe Games::Blackjack::SessionManager do
 
       session = GameSession.last
 
-      expect(session.game_type).to eq("blackjack")
       expect(session.state).to be_present
 
       game = Games::Blackjack::GameSerializer.load(session.state)
@@ -87,18 +85,6 @@ RSpec.describe Games::Blackjack::SessionManager do
       expect(restored.player_hand.cards).to eq([ card(10), card(7), card(4) ])
       expect(restored.remaining_cards).to eq([])
       expect(session.status).to eq("active")
-    end
-
-    it "rejects a session that is not blackjack" do
-      session = GameSession.create!(
-        game_type: "poker",
-        state: { "any" => "payload" },
-        status: "active"
-      )
-
-      expect {
-        described_class.hit!(session)
-      }.to raise_error(ArgumentError, "Not a Blackjack session")
     end
   end
 
