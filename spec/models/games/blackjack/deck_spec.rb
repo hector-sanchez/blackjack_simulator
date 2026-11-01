@@ -5,10 +5,6 @@ require 'rails_helper'
 RSpec.describe Games::Blackjack::Deck do
   subject { described_class.new }
 
-  def card(rank, suit: 'hearts')
-    Games::Blackjack::Card.new(suit: suit, rank: rank)
-  end
-
   def draw_all(deck = subject)
     Array.new(deck.remaining) { deck.draw }
   end

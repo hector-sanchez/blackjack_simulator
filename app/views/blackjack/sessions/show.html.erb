@@ -1,0 +1,34 @@
+<h1>Blackjack</h1>
+
+<% if flash[:alert] %>
+  <p><%= flash[:alert] %></p>
+<% end %>
+
+<p>State: <%= @game[:state] %></p>
+<% if @game[:outcome] %>
+  <p>Outcome: <%= @game[:outcome] %></p>
+<% end %>
+
+<h2>Dealer</h2>
+<ul>
+  <% @game[:dealer_cards].each do |card| %>
+    <li><%= card[:rank] %> of <%= card[:suit] %></li>
+  <% end %>
+</ul>
+
+<h2>Player</h2>
+<ul>
+  <% @game[:player_cards].each do |card| %>
+    <li><%= card[:rank] %> of <%= card[:suit] %></li>
+  <% end %>
+</ul>
+
+<% if @game[:legal_actions].include?("hit") %>
+  <%= button_to "Hit", hit_blackjack_session_path(@game_session) %>
+<% end %>
+
+<% if @game[:legal_actions].include?("stand") %>
+  <%= button_to "Stand", stand_blackjack_session_path(@game_session) %>
+<% end %>
+
+<%= button_to "Deal again", blackjack_sessions_path %>

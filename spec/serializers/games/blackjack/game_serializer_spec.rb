@@ -3,10 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe Games::Blackjack::GameSerializer do
-  def card(rank, suit: 'spades')
-    Games::Blackjack::Card.new(suit: suit, rank: rank)
-  end
-
   def card_hash(card)
     { suit: card.suit, rank: card.rank }
   end

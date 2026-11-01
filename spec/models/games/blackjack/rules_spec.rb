@@ -3,10 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe Games::Blackjack::Rules do
-  def card(rank)
-    Games::Blackjack::Card.new(suit: 'hearts', rank: rank)
-  end
-
   def hand(*ranks)
     Games::Blackjack::Hand.new(ranks.map { |rank| card(rank) })
   end

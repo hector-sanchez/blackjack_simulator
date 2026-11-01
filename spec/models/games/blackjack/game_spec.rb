@@ -3,20 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe Games::Blackjack::Game do
-  def card(rank, suit: 'spades')
-    Games::Blackjack::Card.new(suit: suit, rank: rank)
-  end
-
-  def deck_drawing(*cards)
-    Games::Blackjack::Deck.new(cards: cards)
-  end
-
   def pending_game
     described_class.new(deck: Games::Blackjack::Deck.new(cards: []))
   end
 
   def game_with(*cards)
-    described_class.new(deck: deck_drawing(*cards))
+    described_class.new(deck: deck_with(*cards))
   end
 
   describe '#initialize' do
@@ -39,7 +31,7 @@ RSpec.describe Games::Blackjack::Game do
       dealer_nine = card(9)
       dealer_six = card(6)
       game = described_class.restore(
-        deck: deck_drawing(leftover),
+        deck: deck_with(leftover),
         player_hand: Games::Blackjack::Hand.new([ player_ten, player_seven ]),
         dealer_hand: Games::Blackjack::Hand.new([ dealer_nine, dealer_six ]),
         state: :player_turn,
@@ -56,7 +48,7 @@ RSpec.describe Games::Blackjack::Game do
     it 'draws the next remaining card on hit' do
       extra = card(3)
       game = described_class.restore(
-        deck: deck_drawing(extra),
+        deck: deck_with(extra),
         player_hand: Games::Blackjack::Hand.new([ card(10), card(2) ]),
         dealer_hand: Games::Blackjack::Hand.new([ card(9), card(8) ]),
         state: :player_turn,
@@ -71,7 +63,7 @@ RSpec.describe Games::Blackjack::Game do
 
     it 'keeps a finished round finished' do
       game = described_class.restore(
-        deck: deck_drawing,
+        deck: deck_with,
         player_hand: Games::Blackjack::Hand.new([ card('A'), card('K') ]),
         dealer_hand: Games::Blackjack::Hand.new([ card(9), card(7) ]),
         state: :finished,

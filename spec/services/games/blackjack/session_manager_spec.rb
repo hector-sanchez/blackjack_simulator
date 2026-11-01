@@ -3,14 +3,6 @@
 require "rails_helper"
 
 RSpec.describe Games::Blackjack::SessionManager do
-  def card(rank, suit: "spades")
-    Games::Blackjack::Card.new(rank: rank, suit: suit)
-  end
-
-  def deck_with(*cards)
-    Games::Blackjack::Deck.new(cards: cards)
-  end
-
   def create_session(deck:)
     game = Games::Blackjack::Game.new(deck: deck)
     game.start!
