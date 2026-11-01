@@ -18,16 +18,14 @@ module Blackjack
 
     def hit
       Games::Blackjack::SessionManager.hit!(@game_session)
+
       redirect_to blackjack_session_path(@game_session)
-    rescue Games::Blackjack::Game::InvalidActionError
-      redirect_to blackjack_session_path(@game_session), alert: "That action is not allowed."
     end
 
     def stand
       Games::Blackjack::SessionManager.stand!(@game_session)
+
       redirect_to blackjack_session_path(@game_session)
-    rescue Games::Blackjack::Game::InvalidActionError
-      redirect_to blackjack_session_path(@game_session), alert: "That action is not allowed."
     end
 
     private

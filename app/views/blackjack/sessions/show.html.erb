@@ -1,9 +1,5 @@
 <h1>Blackjack</h1>
 
-<% if flash[:alert] %>
-  <p><%= flash[:alert] %></p>
-<% end %>
-
 <p>State: <%= @game[:state] %></p>
 <% if @game[:outcome] %>
   <p>Outcome: <%= @game[:outcome] %></p>
