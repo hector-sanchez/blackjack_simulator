@@ -3,10 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe Games::Blackjack::Rules do
-  def hand(*ranks)
-    Games::Blackjack::Hand.new(ranks.map { |rank| card(rank) })
-  end
-
   describe '.legal_actions' do
     [
       { ranks: [ 10, 7 ], result: [ :hit, :stand ], case: 'allows hit and stand below 21' },
@@ -15,7 +11,7 @@ RSpec.describe Games::Blackjack::Rules do
       { ranks: [ 'A', 'K' ], result: [], case: 'prevents actions after natural blackjack' }
     ].each do |scenario|
       it scenario[:case] do
-        expect(described_class.legal_actions(hand(*scenario[:ranks]))).to eq(scenario[:result])
+        expect(described_class.legal_actions(hand_with(*scenario[:ranks]))).to eq(scenario[:result])
       end
     end
   end
@@ -29,7 +25,7 @@ RSpec.describe Games::Blackjack::Rules do
       { ranks: [ 10, 8 ], result: false, case: 'stands above 17' }
     ].each do |scenario|
       it scenario[:case] do
-        expect(described_class.dealer_hits?(hand(*scenario[:ranks]))).to eq(scenario[:result])
+        expect(described_class.dealer_hits?(hand_with(*scenario[:ranks]))).to eq(scenario[:result])
       end
     end
   end
@@ -47,8 +43,8 @@ RSpec.describe Games::Blackjack::Rules do
       { player: [ 'A', 'K' ], dealer: [ 'A', 10 ], result: :push, case: 'simultaneous naturals' }
     ].each do |scenario|
       it "resolves #{scenario[:case]}" do
-        player_hand = hand(*scenario[:player])
-        dealer_hand = hand(*scenario[:dealer])
+        player_hand = hand_with(*scenario[:player])
+        dealer_hand = hand_with(*scenario[:dealer])
 
         expect(described_class.outcome(player_hand, dealer_hand)).to eq(scenario[:result])
       end

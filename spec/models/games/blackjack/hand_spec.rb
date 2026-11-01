@@ -3,10 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe Games::Blackjack::Hand do
-  def hand_with(*ranks)
-    described_class.new(ranks.map { |rank| card(rank) })
-  end
-
   describe '#initialize' do
     it 'starts empty by default' do
       hand = described_class.new
